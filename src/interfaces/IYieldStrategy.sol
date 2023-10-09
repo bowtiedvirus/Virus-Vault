@@ -2,6 +2,6 @@
 pragma solidity 0.8.19;
 
 interface IYieldStrategy {  
-    function deposit() external returns(bool);  
-    function withdraw() external returns(bool);  
+    function deposit(uint256 amount) external returns(bool);  
+    function withdraw(uint256 amount) external returns(bool);  
 }
