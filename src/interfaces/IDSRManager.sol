@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity 0.8.19;
+pragma solidity ^0.8.13;
 
 interface IDSRManager {
     function daiBalance(address usr) external returns (uint256 wad);

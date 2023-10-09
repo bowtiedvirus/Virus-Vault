@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity 0.8.19;
+pragma solidity ^0.8.13;
 
 import {console2} from "forge-std/Test.sol";
 
@@ -11,6 +11,10 @@ import {IYieldStrategy} from "../../src/interfaces/IYieldStrategy.sol";
 // This will be used as an "implementation" for the YieldStrategy by delegatecall.
 contract MockYieldStrategy is IYieldStrategy {
     using SafeTransferLib for ERC20;
+
+    // @note Put this here to make forge coverage not track the coverage of this contract.
+    // https://github.com/foundry-rs/foundry/issues/2988
+    function test() public {}
 
     function deposit(address underlying_asset, address target, uint256 amount) public override {
         ERC20(underlying_asset).safeApprove(target, amount);
@@ -33,6 +37,10 @@ contract MockYieldStrategy is IYieldStrategy {
 contract MockYieldStrategyBadDeposit is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
+    // @note Put this here to make forge coverage not track the coverage of this contract.
+    // https://github.com/foundry-rs/foundry/issues/2988
+    function test() public {}
+
     function deposit(address, address, uint256) external pure override {
         revert();
     }
@@ -53,6 +61,10 @@ contract MockYieldStrategyBadDeposit is IYieldStrategy {
 contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
+    // @note Put this here to make forge coverage not track the coverage of this contract.
+    // https://github.com/foundry-rs/foundry/issues/2988
+    function test() public {}
+
     function deposit(address, address, uint256) external pure override {}
 
     function withdraw(address, address, uint256) external pure override {
@@ -70,6 +82,10 @@ contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
 
 contract MockYieldStrategyBadWithdraw is IYieldStrategy {
     using SafeTransferLib for ERC20;
+
+    // @note Put this here to make forge coverage not track the coverage of this contract.
+    // https://github.com/foundry-rs/foundry/issues/2988
+    function test() public {}
 
     function deposit(address, address, uint256) external pure override {}
 
@@ -95,6 +111,10 @@ contract MockPool {
     constructor(ERC20 underlying) {
         s_underlying = underlying;
     }
+
+    // @note Put this here to make forge coverage not track the coverage of this contract.
+    // https://github.com/foundry-rs/foundry/issues/2988
+    function test() public {}
 
     function stake(uint256 amount) external {
         s_balances[msg.sender] += amount;

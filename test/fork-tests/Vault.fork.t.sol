@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity 0.8.19;
+pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/Test.sol";
@@ -11,11 +11,11 @@ import {
     CouldNotWithdrawFromStrategy,
     CouldNotDepositToStrategy,
     CouldNotGetTotalAssetsFromStrategy
-} from "../src/Vault.sol";
-import {IYieldStrategy} from "../src/interfaces/IYieldStrategy.sol";
-import {IDSRManager} from "../src/interfaces/IDSRManager.sol";
-import {MakerDAOYieldStrategy} from "../src/MakerDAOYieldStrategy.sol";
-import {MockYieldStrategy, MockPool} from "./mocks/MockYieldStrategy.sol";
+} from "../../src/Vault.sol";
+import {IYieldStrategy} from "../../src/interfaces/IYieldStrategy.sol";
+import {IDSRManager} from "../../src/interfaces/IDSRManager.sol";
+import {MakerDAOYieldStrategy} from "../../src/MakerDAOYieldStrategy.sol";
+import {MockYieldStrategy, MockPool} from "../mocks/MockYieldStrategy.sol";
 
 // Note: When using the MakerDAOYieldStrategy, on deposit there is a 1 unit of token lost, it might be a fee or a rounding issue in the DSR.
 // Therefore, these tests check for a balance greater than 99 instead of 100, even though it SHOULD be greater than 99.9999... ether, just easier to read this way.
@@ -34,7 +34,8 @@ contract VaultForkTest is Test {
     address bob;
 
     function setUp() public {
-        mainnetFork = vm.createFork(vm.envString("MAINNET_RPC_URL"));
+        string memory rpc_url = vm.envString("MAINNET_RPC_URL");
+        mainnetFork = vm.createFork(rpc_url);
         vm.selectFork(mainnetFork);
 
         owner = makeAddr("owner");

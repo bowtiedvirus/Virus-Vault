@@ -5,7 +5,12 @@ import "forge-std/Script.sol";
 import "../src/Vault.sol";
 import "../src/MakerDAOYieldStrategy.sol";
 
+// Never really finished this up, since I decided to do fork tests on mainnet instead.
 contract GoerliDeployVault is Script {
+    // @note Put this here to make forge coverage not track the coverage of this contract.
+    // https://github.com/foundry-rs/foundry/issues/2988
+    function test() public {}
+
     function run() external returns (address) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
