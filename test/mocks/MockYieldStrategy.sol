@@ -12,19 +12,17 @@ import {IYieldStrategy} from "../../src/interfaces/IYieldStrategy.sol";
 contract MockYieldStrategy is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address underlying_asset, address target, uint256 amount) external override returns (bool) {
+    function deposit(address underlying_asset, address target, uint256 amount) external override {
         ERC20(underlying_asset).safeApprove(target, amount);
         MockPool(target).stake(amount);
-        return true;
     }
 
     function withdraw(address, /* underlying_asset */ address target, uint256 amount)
         external
         override
-        returns (bool)
+    
     {
         MockPool(target).unstake(amount);
-        return true;
     }
 
     function totalAssets(address, /* underlying_asset */ address target) external view override returns (uint256) {
@@ -35,11 +33,11 @@ contract MockYieldStrategy is IYieldStrategy {
 contract MockYieldStrategyBadDeposit is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address, address, uint256) external pure override returns (bool) {
+    function deposit(address, address, uint256) external pure override {
         revert();
     }
 
-    function withdraw(address, address, uint256) external pure override returns (bool) {
+    function withdraw(address, address, uint256) external pure override {
         revert();
     }
 
@@ -51,11 +49,10 @@ contract MockYieldStrategyBadDeposit is IYieldStrategy {
 contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address, address, uint256) external pure override returns (bool) {
-        return true;
+    function deposit(address, address, uint256) external pure override {
     }
 
-    function withdraw(address, address, uint256) external pure override returns (bool) {
+    function withdraw(address, address, uint256) external pure override {
         revert();
     }
 
@@ -67,11 +64,10 @@ contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
 contract MockYieldStrategyBadWithdraw is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address, address, uint256) external pure override returns (bool) {
-        return true;
+    function deposit(address, address, uint256) external pure override {
     }
 
-    function withdraw(address, address, uint256) external pure override returns (bool) {
+    function withdraw(address, address, uint256) external pure override {
         revert();
     }
 
