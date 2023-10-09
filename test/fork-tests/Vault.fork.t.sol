@@ -46,7 +46,7 @@ contract VaultForkTest is Test {
         s_pool = MAINNET_DSRMANAGER;
 
         vm.startPrank(owner);
-        s_strategy = new MakerDAOYieldStrategy();
+        s_strategy = new MakerDAOYieldStrategy(MAINNET_DAI);
         s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, s_pool));
         vm.stopPrank();
 
@@ -58,7 +58,7 @@ contract VaultForkTest is Test {
 
     function testOnlyOwnerCanSetStrategy() public {
         vm.startPrank(owner);
-        IYieldStrategy newStrategy = new MakerDAOYieldStrategy();
+        IYieldStrategy newStrategy = new MakerDAOYieldStrategy(MAINNET_DAI);
         StrategyParams memory newStrategyParams = StrategyParams(newStrategy, s_pool);
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
