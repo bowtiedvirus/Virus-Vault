@@ -5,5 +5,6 @@ pragma solidity 0.8.19;
 interface IYieldStrategy {
     function deposit(address underlying_asset, address target, uint256 amount) external;
     function withdraw(address underlying_asset, address target, uint256 amount) external;
+    function withdrawAll(address, address target) external;
     function totalAssets(address underlying_asset, address target) external returns (uint256);
 }

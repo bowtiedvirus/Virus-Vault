@@ -22,6 +22,11 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         IDSRManager dsrM = IDSRManager(target);
         dsrM.exit(address(this), amount);
     }
+    
+    function withdrawAll(address, address target) external override {
+        IDSRManager dsrM = IDSRManager(target);
+        dsrM.exitAll(address(this));
+    }
 
     function totalAssets(address, address target) external override returns (uint256) {
         IDSRManager dsrM = IDSRManager(target);

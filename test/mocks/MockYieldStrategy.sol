@@ -12,16 +12,20 @@ import {IYieldStrategy} from "../../src/interfaces/IYieldStrategy.sol";
 contract MockYieldStrategy is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address underlying_asset, address target, uint256 amount) external override {
+    function deposit(address underlying_asset, address target, uint256 amount) public override {
         ERC20(underlying_asset).safeApprove(target, amount);
         MockPool(target).stake(amount);
     }
 
-    function withdraw(address, /* underlying_asset */ address target, uint256 amount) external override {
+    function withdraw(address, address target, uint256 amount) public override {
         MockPool(target).unstake(amount);
     }
 
-    function totalAssets(address, /* underlying_asset */ address target) external view override returns (uint256) {
+    function withdrawAll(address, address target) public override {
+        MockPool(target).unstake(totalAssets(address(this), target));
+    }
+
+    function totalAssets(address, address target) public view override returns (uint256) {
         return MockPool(target).s_balances(address(this));
     }
 }
@@ -34,6 +38,10 @@ contract MockYieldStrategyBadDeposit is IYieldStrategy {
     }
 
     function withdraw(address, address, uint256) external pure override {
+        revert();
+    }
+    
+    function withdrawAll(address, address) external pure override {
         revert();
     }
 
@@ -51,6 +59,10 @@ contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
         revert();
     }
 
+    function withdrawAll(address, address) external pure override {
+        revert();
+    }
+
     function totalAssets(address, address) external pure override returns (uint256) {
         revert();
     }
@@ -62,6 +74,10 @@ contract MockYieldStrategyBadWithdraw is IYieldStrategy {
     function deposit(address, address, uint256) external pure override {}
 
     function withdraw(address, address, uint256) external pure override {
+        revert();
+    }
+
+    function withdrawAll(address, address) external pure override {
         revert();
     }
 
