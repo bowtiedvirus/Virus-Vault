@@ -60,6 +60,22 @@ contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
     }
 }
 
+contract MockYieldStrategyBadWithdraw is IYieldStrategy {
+    using SafeTransferLib for ERC20;
+
+    function deposit(address, address, uint256) external pure override returns (bool) {
+        return true;
+    }
+
+    function withdraw(address, address, uint256) external pure override returns (bool) {
+        revert();
+    }
+
+    function totalAssets(address, address) external pure override returns (uint256) {
+        return 0;
+    }
+}
+
 contract MockPool {
     using SafeTransferLib for ERC20;
 
