@@ -7,7 +7,7 @@ import {ERC4626} from "@solmate/src/mixins/ERC4626.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IYieldStrategy} from "./interfaces/IYieldStrategy.sol";
-import {DestinationVaultManager} from "./DestinationManager.sol";
+import {DestinationVaultManager} from "./DestinationVaultManager.sol";
 import {SourceVaultManager} from "./SourceVaultManager.sol";
 
 error Vault_CouldNotWithdrawFromStrategy(address sender, address asset, address yieldStrategyTarget, uint256 amount);

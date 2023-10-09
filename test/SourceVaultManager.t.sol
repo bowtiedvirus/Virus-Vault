@@ -63,6 +63,14 @@ contract SourceVaultManagerTest is Test {
         vm.stopPrank();
     }
 
+    function testOnlyOwnerCanSetApprovedDestinationVaultManager() public {
+        vm.startPrank(owner);
+        s_sourceVaultManager.setApprovedDestinationVaultManager(0, address(0x1));
+        vm.stopPrank();
+
+        assertEq(s_sourceVaultManager.approvedDestinationVaultManagers(0), address(0x1));
+    }
+
     function testOnlyApprovedDestinationVaultManagersCanBeSentTo(uint64 chainId, address destinationVaultManager) public {
         vm.assume(chainId != 0);
         vm.assume(destinationVaultManager != address(0x0));
