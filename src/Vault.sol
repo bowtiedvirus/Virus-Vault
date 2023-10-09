@@ -57,17 +57,20 @@ contract Vault is ERC4626, Ownable {
         // Could do s_totalAssetsInStrategy += assets instead? Could be more gas efficient
     }
 
-
     /*//////////////////////////////////////////////////////////////
                           Yield Strategy Logic
     //////////////////////////////////////////////////////////////*/
 
-    modifier after_updateTotalAssetsInStrategy {
+    modifier after_updateTotalAssetsInStrategy() {
         _;
         s_totalAssetsInStrategy = _getTotalAssetsInStrategy();
     }
 
-    function setNewStrategy(IYieldStrategy newStrategyImplementation, address strategyTarget) external onlyOwner after_updateTotalAssetsInStrategy {
+    function setNewStrategy(IYieldStrategy newStrategyImplementation, address strategyTarget)
+        external
+        onlyOwner
+        after_updateTotalAssetsInStrategy
+    {
         _withdrawFromStrategy(s_totalAssetsInStrategy);
 
         s_yieldStrategyImplementation = newStrategyImplementation;
@@ -101,7 +104,7 @@ contract Vault is ERC4626, Ownable {
 
         emit StrategyDeposit(s_yieldStrategyImplementation, amount);
     }
-    
+
     function _getTotalAssetsInStrategy() internal returns (uint256) {
         address yieldStrategyAddress = address(s_yieldStrategyImplementation);
         bytes memory totalAssetsCalldata =

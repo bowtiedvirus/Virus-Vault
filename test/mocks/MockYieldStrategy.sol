@@ -18,7 +18,11 @@ contract MockYieldStrategy is IYieldStrategy {
         return true;
     }
 
-    function withdraw(address, /* underlying_asset */ address target, uint256 amount) external override returns (bool) {
+    function withdraw(address, /* underlying_asset */ address target, uint256 amount)
+        external
+        override
+        returns (bool)
+    {
         MockPool(target).unstake(amount);
         return true;
     }

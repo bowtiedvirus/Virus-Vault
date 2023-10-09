@@ -2,11 +2,14 @@
 pragma solidity 0.8.19;
 
 import {ERC20} from "@solmate/src/tokens/ERC20.sol";
-// import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {IYieldStrategy} from "./interfaces/IYieldStrategy.sol";
 
 // This will be used as an "implementation" for the YieldStrategy by delegatecall.
-abstract contract MakerDAOYieldStrategy is IYieldStrategy {
-    constructor() {}
+contract MakerDAOYieldStrategy is IYieldStrategy {
+    function deposit(address underlying_asset, address target, uint256 amount) external override returns (bool) {}
+
+    function withdraw(address underlying_asset, address target, uint256 amount) external override returns (bool) {}
+
+    function totalAssets(address underlying_asset, address target) external view override returns (uint256) {}
 }

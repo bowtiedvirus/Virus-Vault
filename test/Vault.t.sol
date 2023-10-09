@@ -6,9 +6,19 @@ import {console2} from "forge-std/Test.sol";
 
 import {MockERC20} from "@solmate/src/test/utils/mocks/MockERC20.sol";
 import {Vault} from "../src/Vault.sol";
-import {CouldNotWithdrawFromStrategy, CouldNotDepositToStrategy, CouldNotGetTotalAssetsFromStrategy} from "../src/Vault.sol";
+import {
+    CouldNotWithdrawFromStrategy,
+    CouldNotDepositToStrategy,
+    CouldNotGetTotalAssetsFromStrategy
+} from "../src/Vault.sol";
 import {IYieldStrategy} from "../src/interfaces/IYieldStrategy.sol";
-import {MockYieldStrategy, MockPool, MockYieldStrategyBadDeposit, MockYieldStrategyBadTotalAssets, MockYieldStrategyBadWithdraw} from "./mocks/MockYieldStrategy.sol";
+import {
+    MockYieldStrategy,
+    MockPool,
+    MockYieldStrategyBadDeposit,
+    MockYieldStrategyBadTotalAssets,
+    MockYieldStrategyBadWithdraw
+} from "./mocks/MockYieldStrategy.sol";
 
 contract OwnableERC4626Test is Test {
     MockERC20 s_underlying;
@@ -89,19 +99,23 @@ contract OwnableERC4626Test is Test {
     function testYieldStrategyWithBadDepositIsRejectedBySetNewStrategy() public {
         vm.startPrank(owner);
         IYieldStrategy badStrategy = new MockYieldStrategyBadDeposit();
-        
+
         // If this strategy is bad (reverts on deposit), the vault will also revert when depositing to the new strategy target.
-        vm.expectRevert(abi.encodeWithSelector(CouldNotDepositToStrategy.selector, owner, address(s_underlying), address(s_pool), 0));
+        vm.expectRevert(
+            abi.encodeWithSelector(CouldNotDepositToStrategy.selector, owner, address(s_underlying), address(s_pool), 0)
+        );
         s_vault.setNewStrategy(badStrategy, address(s_pool));
         vm.stopPrank();
     }
-    
+
     function testYieldStrategyWithBadTotalAssetsIsRejectedBySetNewStrategy() public {
         vm.startPrank(owner);
         IYieldStrategy badStrategy = new MockYieldStrategyBadTotalAssets();
 
         // If this strategy is bad (reverts on totalAssets), the vault will also revert when re-calculating totalAssets.
-        vm.expectRevert(abi.encodeWithSelector(CouldNotGetTotalAssetsFromStrategy.selector, address(s_underlying), address(s_pool)));
+        vm.expectRevert(
+            abi.encodeWithSelector(CouldNotGetTotalAssetsFromStrategy.selector, address(s_underlying), address(s_pool))
+        );
         s_vault.setNewStrategy(badStrategy, address(s_pool));
         vm.stopPrank();
     }
@@ -118,7 +132,11 @@ contract OwnableERC4626Test is Test {
         vm.stopPrank();
 
         vm.startPrank(alice);
-        vm.expectRevert(abi.encodeWithSelector(CouldNotWithdrawFromStrategy.selector, alice, address(s_underlying), address(s_pool), 100 ether));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CouldNotWithdrawFromStrategy.selector, alice, address(s_underlying), address(s_pool), 100 ether
+            )
+        );
         s_vault.withdraw(100 ether, alice, alice);
         vm.stopPrank();
     }
@@ -133,7 +151,7 @@ contract OwnableERC4626Test is Test {
 
         assertEq(s_underlying.balanceOf(address(s_vault)), 0 ether);
         assertEq(s_pool.s_balances(address(s_vault)), 100 ether);
-        
+
         vm.startPrank(owner);
         IYieldStrategy newStrategy = new MockYieldStrategy();
         s_vault.setNewStrategy(newStrategy, address(newPool));
