@@ -7,6 +7,7 @@ remappings = [
     "@solmate/=lib/solmate/",
     "@chainlink/contracts/=node_modules/@chainlink/contracts",
     "@chainlink/contracts-ccip/=node_modules/@chainlink/contracts-ccip",
+    "@uniswap/v2-periphery/=node_modules/@uniswap/v2-periphery"
 ]
 gas_reports = ["MakerDAOYieldStrategy", "Vault"]
 
