@@ -7,20 +7,11 @@ import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 import {SafeTransferLib} from "@solmate/src/utils/SafeTransferLib.sol";
 
 contract MockDsrManager {
-    function daiBalance(address usr) external returns (uint256 wad) {
+    function daiBalance(address usr) external returns (uint256 wad) {}
 
-    }
+    function join(address dst, uint256 wad) external {}
 
-    function join(address dst, uint256 wad) external {
+    function exit(address dst, uint256 wad) external {}
 
-    }
-
-    function exit(address dst, uint256 wad) external {
-
-    }
-
-    function exitAll(address dst) external {
-
-    }
-
+    function exitAll(address dst) external {}
 }

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity 0.8.19;
 
-import "forge-std/Test.sol"; 
+import "forge-std/Test.sol";
 import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 
 import {IYieldStrategy} from "../src/interfaces/IYieldStrategy.sol";
 import {IDSRManager} from "../src/interfaces/IDSRManager.sol";
 import {MakerDAOYieldStrategy} from "../src/MakerDAOYieldStrategy.sol";
-
 
 contract MakerDAOYieldStrategyForkTest is Test {
     uint256 mainnetFork;
@@ -39,7 +38,7 @@ contract MakerDAOYieldStrategyForkTest is Test {
     function testDeposit() public {
         s_strategy.deposit(MAINNET_DAI, MAINNET_DSRMANAGER, 100 ether);
         vm.rollFork(block.number + 1);
-        uint balance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
+        uint256 balance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertEq(ERC20(MAINNET_DAI).balanceOf(address(s_strategy)), 0 ether);
         assertGe(balance, 100 ether);
@@ -48,25 +47,25 @@ contract MakerDAOYieldStrategyForkTest is Test {
     function testWithdraw() public {
         s_strategy.deposit(MAINNET_DAI, MAINNET_DSRMANAGER, 100 ether);
         vm.rollFork(block.number + 1);
-        uint depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
+        uint256 depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertEq(ERC20(MAINNET_DAI).balanceOf(address(s_strategy)), 0 ether);
         assertGe(depositBalance, 100 ether);
 
         s_strategy.withdraw(MAINNET_DAI, MAINNET_DSRMANAGER, depositBalance);
-        uint withdrawBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
+        uint256 withdrawBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertGe(ERC20(MAINNET_DAI).balanceOf(address(s_strategy)), 100 ether);
         assertEq(withdrawBalance, 0 ether);
     }
 
     function testGetTotalAssets() public {
-        uint balance = s_strategy.totalAssets(MAINNET_DAI, MAINNET_DSRMANAGER);
+        uint256 balance = s_strategy.totalAssets(MAINNET_DAI, MAINNET_DSRMANAGER);
         assertEq(balance, 0 ether);
 
         s_strategy.deposit(MAINNET_DAI, MAINNET_DSRMANAGER, 100 ether);
         vm.rollFork(block.number + 1);
-        uint depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
+        uint256 depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
         assertGe(depositBalance, 100 ether);
     }
 }

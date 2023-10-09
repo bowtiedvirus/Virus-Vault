@@ -17,11 +17,7 @@ contract MockYieldStrategy is IYieldStrategy {
         MockPool(target).stake(amount);
     }
 
-    function withdraw(address, /* underlying_asset */ address target, uint256 amount)
-        external
-        override
-    
-    {
+    function withdraw(address, /* underlying_asset */ address target, uint256 amount) external override {
         MockPool(target).unstake(amount);
     }
 
@@ -49,8 +45,7 @@ contract MockYieldStrategyBadDeposit is IYieldStrategy {
 contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address, address, uint256) external pure override {
-    }
+    function deposit(address, address, uint256) external pure override {}
 
     function withdraw(address, address, uint256) external pure override {
         revert();
@@ -64,8 +59,7 @@ contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
 contract MockYieldStrategyBadWithdraw is IYieldStrategy {
     using SafeTransferLib for ERC20;
 
-    function deposit(address, address, uint256) external pure override {
-    }
+    function deposit(address, address, uint256) external pure override {}
 
     function withdraw(address, address, uint256) external pure override {
         revert();

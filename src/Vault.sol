@@ -12,11 +12,15 @@ error CouldNotWithdrawFromStrategy(address sender, address asset, address yieldS
 error CouldNotDepositToStrategy(address sender, address asset, address yieldStrategyTarget, uint256 amount);
 error CouldNotGetTotalAssetsFromStrategy(address asset, address yieldStrategyTarget);
 
+struct StrategyParams {
+    IYieldStrategy implementation;
+    address target;
+}
+
 /// @notice Minimal ERC4626 tokenized Vault implementation.
 /// @author Forked from Solmate ERC4626 (https://github.com/transmissions11/solmate/blob/main/src/mixins/ERC4626.sol)
 contract Vault is ERC4626, Ownable {
-    IYieldStrategy public s_yieldStrategyImplementation;
-    address public s_yieldStrategyTarget;
+    StrategyParams public s_strategy;
 
     uint256 public s_totalAssetsInStrategy;
 
@@ -26,15 +30,11 @@ contract Vault is ERC4626, Ownable {
     event StrategyDeposit(IYieldStrategy strategy, uint256 amount);
     event StrategyWithdrawal(IYieldStrategy strategy, uint256 amount);
 
-    constructor(
-        ERC20 _asset,
-        string memory _name,
-        string memory _symbol,
-        IYieldStrategy yieldStrategy,
-        address strategyTarget
-    ) ERC4626(_asset, _name, _symbol) Ownable() {
-        s_yieldStrategyImplementation = yieldStrategy;
-        s_yieldStrategyTarget = strategyTarget;
+    constructor(ERC20 _asset, string memory _name, string memory _symbol, StrategyParams memory strategy)
+        ERC4626(_asset, _name, _symbol)
+        Ownable()
+    {
+        s_strategy = strategy;
         s_totalAssetsInStrategy = 0;
     }
 
@@ -66,53 +66,48 @@ contract Vault is ERC4626, Ownable {
         s_totalAssetsInStrategy = _getTotalAssetsInStrategy();
     }
 
-    function setNewStrategy(IYieldStrategy newStrategyImplementation, address strategyTarget)
-        external
-        onlyOwner
-        after_updateTotalAssetsInStrategy
-    {
+    function setNewStrategy(StrategyParams memory newStrategy) external onlyOwner after_updateTotalAssetsInStrategy {
         _withdrawFromStrategy(s_totalAssetsInStrategy);
 
-        s_yieldStrategyImplementation = newStrategyImplementation;
-        s_yieldStrategyTarget = strategyTarget;
+        s_strategy = newStrategy;
 
         _depositToStrategy(s_totalAssetsInStrategy);
     }
 
     function _withdrawFromStrategy(uint256 amount) internal {
-        address yieldStrategyAddress = address(s_yieldStrategyImplementation);
+        address yieldStrategyAddress = address(s_strategy.implementation);
         bytes memory withdrawCalldata =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", address(asset), s_yieldStrategyTarget, amount);
+            abi.encodeWithSignature("withdraw(address,address,uint256)", address(asset), s_strategy.target, amount);
 
         (bool success,) = yieldStrategyAddress.delegatecall(withdrawCalldata);
         if (!success) {
-            revert CouldNotWithdrawFromStrategy(msg.sender, address(asset), s_yieldStrategyTarget, amount);
+            revert CouldNotWithdrawFromStrategy(msg.sender, address(asset), s_strategy.target, amount);
         }
 
-        emit StrategyWithdrawal(s_yieldStrategyImplementation, amount);
+        emit StrategyWithdrawal(s_strategy.implementation, amount);
     }
 
     function _depositToStrategy(uint256 amount) internal {
-        address yieldStrategyAddress = address(s_yieldStrategyImplementation);
+        address yieldStrategyAddress = address(s_strategy.implementation);
         bytes memory depositCalldata =
-            abi.encodeWithSignature("deposit(address,address,uint256)", address(asset), s_yieldStrategyTarget, amount);
+            abi.encodeWithSignature("deposit(address,address,uint256)", address(asset), s_strategy.target, amount);
 
         (bool success,) = yieldStrategyAddress.delegatecall(depositCalldata);
         if (!success) {
-            revert CouldNotDepositToStrategy(msg.sender, address(asset), s_yieldStrategyTarget, amount);
+            revert CouldNotDepositToStrategy(msg.sender, address(asset), s_strategy.target, amount);
         }
 
-        emit StrategyDeposit(s_yieldStrategyImplementation, amount);
+        emit StrategyDeposit(s_strategy.implementation, amount);
     }
 
     function _getTotalAssetsInStrategy() internal returns (uint256) {
-        address yieldStrategyAddress = address(s_yieldStrategyImplementation);
+        address yieldStrategyAddress = address(s_strategy.implementation);
         bytes memory totalAssetsCalldata =
-            abi.encodeWithSignature("totalAssets(address,address)", address(asset), s_yieldStrategyTarget);
+            abi.encodeWithSignature("totalAssets(address,address)", address(asset), s_strategy.target);
 
         (bool success, bytes memory retData) = yieldStrategyAddress.delegatecall(totalAssetsCalldata);
         if (!success) {
-            revert CouldNotGetTotalAssetsFromStrategy(address(asset), s_yieldStrategyTarget);
+            revert CouldNotGetTotalAssetsFromStrategy(address(asset), s_strategy.target);
         }
 
         return abi.decode(retData, (uint256));

@@ -5,8 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/Test.sol";
 
 import {MockERC20} from "@solmate/src/test/utils/mocks/MockERC20.sol";
-import {Vault} from "../src/Vault.sol";
 import {
+    Vault,
+    StrategyParams,
     CouldNotWithdrawFromStrategy,
     CouldNotDepositToStrategy,
     CouldNotGetTotalAssetsFromStrategy
@@ -40,7 +41,8 @@ contract VaultTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MockYieldStrategy();
-        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", s_strategy, address(s_pool));
+        s_vault =
+            new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)));
         vm.stopPrank();
 
         s_underlying.mint(address(s_pool), 1000 ether);
@@ -51,10 +53,13 @@ contract VaultTest is Test {
     function testOnlyOwnerCanSetStrategy() public {
         vm.startPrank(owner);
         IYieldStrategy newStrategy = new MockYieldStrategy();
-        s_vault.setNewStrategy(newStrategy, address(s_pool));
+        StrategyParams memory newStrategyParams = StrategyParams(newStrategy, address(s_pool));
+        s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
 
-        assertEq(address(s_vault.s_yieldStrategyImplementation()), address(newStrategy));
+        (IYieldStrategy implementation, address target) = s_vault.s_strategy();
+        assertEq(address(implementation), address(newStrategy));
+        assertEq(target, address(s_pool));
     }
 
     function testNonOwnerUnableToSetStrategy() public {
@@ -64,7 +69,8 @@ contract VaultTest is Test {
 
         vm.startPrank(alice);
         vm.expectRevert();
-        s_vault.setNewStrategy(newStrategy, address(s_pool));
+        StrategyParams memory newStrategyParams = StrategyParams(newStrategy, address(s_pool));
+        s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
     }
 
@@ -104,7 +110,9 @@ contract VaultTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(CouldNotDepositToStrategy.selector, owner, address(s_underlying), address(s_pool), 0)
         );
-        s_vault.setNewStrategy(badStrategy, address(s_pool));
+
+        StrategyParams memory newStrategyParams = StrategyParams(badStrategy, address(s_pool));
+        s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
     }
 
@@ -116,7 +124,8 @@ contract VaultTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(CouldNotGetTotalAssetsFromStrategy.selector, address(s_underlying), address(s_pool))
         );
-        s_vault.setNewStrategy(badStrategy, address(s_pool));
+        StrategyParams memory newStrategyParams = StrategyParams(badStrategy, address(s_pool));
+        s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
     }
 
@@ -128,7 +137,8 @@ contract VaultTest is Test {
 
         vm.startPrank(owner);
         IYieldStrategy badStrategy = new MockYieldStrategyBadWithdraw();
-        s_vault.setNewStrategy(badStrategy, address(s_pool));
+        StrategyParams memory newStrategyParams = StrategyParams(badStrategy, address(s_pool));
+        s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
 
         vm.startPrank(alice);
@@ -142,7 +152,6 @@ contract VaultTest is Test {
     }
 
     function testVaultMovesAssetsToNewStrategyWhenSet() public {
-        MockPool newPool = new MockPool(s_underlying);
 
         vm.startPrank(alice);
         s_underlying.approve(address(s_vault), 100 ether);
@@ -152,9 +161,11 @@ contract VaultTest is Test {
         assertEq(s_underlying.balanceOf(address(s_vault)), 0 ether);
         assertEq(s_pool.s_balances(address(s_vault)), 100 ether);
 
+        MockPool newPool = new MockPool(s_underlying);
         vm.startPrank(owner);
         IYieldStrategy newStrategy = new MockYieldStrategy();
-        s_vault.setNewStrategy(newStrategy, address(newPool));
+        StrategyParams memory newStrategyParams = StrategyParams(newStrategy, address(newPool));
+        s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
 
         assertEq(s_underlying.balanceOf(address(s_vault)), 0 ether);

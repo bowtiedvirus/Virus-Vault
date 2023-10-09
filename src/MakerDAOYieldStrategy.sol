@@ -6,38 +6,26 @@ import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 import {IYieldStrategy} from "./interfaces/IYieldStrategy.sol";
 import {IDSRManager} from "./interfaces/IDSRManager.sol";
 
-interface DsrManager {
-    function daiBalance(address usr) external returns (uint256 wad);
-    function join(address dst, uint256 wad) external;
-    function exit(address dst, uint256 wad) external;
-    function exitAll(address dst) external;
-}
-
-interface GemLike {
-    function transferFrom(address,address,uint) external returns (bool);
-    function approve(address,uint) external returns (bool);
-}
-
 // This will be used as an "implementation" for the YieldStrategy by delegatecall.
 contract MakerDAOYieldStrategy is IYieldStrategy {
-    event DaiBalance(address indexed src, uint balance);
+    event DaiBalance(address indexed src, uint256 balance);
 
     function deposit(address underlying_asset, address target, uint256 amount) external override {
         ERC20 daiToken = ERC20(underlying_asset);
-        DsrManager dsrM = DsrManager(target);
+        IDSRManager dsrM = IDSRManager(target);
 
         daiToken.approve(address(dsrM), amount);
         dsrM.join(address(this), amount);
     }
 
     function withdraw(address, address target, uint256 amount) external override {
-        DsrManager dsrM = DsrManager(target);
+        IDSRManager dsrM = IDSRManager(target);
         dsrM.exit(address(this), amount);
     }
 
     function totalAssets(address, address target) external override returns (uint256) {
-        DsrManager dsrM = DsrManager(target);
-        uint balance = dsrM.daiBalance(address(this));
+        IDSRManager dsrM = IDSRManager(target);
+        uint256 balance = dsrM.daiBalance(address(this));
         emit DaiBalance(address(this), balance);
         return balance;
     }
