@@ -6,8 +6,7 @@ import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 
 import {IYieldStrategy} from "./interfaces/IYieldStrategy.sol";
 
-
-// This will be used as an "implementation" for the YieldStrategy by delegatecall. 
-abstract contract MakerDAOYieldStrategy is IYieldStrategy {    
+// This will be used as an "implementation" for the YieldStrategy by delegatecall.
+abstract contract MakerDAOYieldStrategy is IYieldStrategy {
     constructor() {}
 }

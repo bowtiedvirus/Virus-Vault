@@ -10,9 +10,9 @@
 
 // contract Vault is Ownable {
 //     OwnableERC4626 immutable vault;
-    
+
 //     constructor(
-//         ERC20 asset, 
+//         ERC20 asset,
 //         string memory name,
 //         string memory symbol
 //         ) Ownable() {
@@ -34,15 +34,13 @@
 //     function redeem(uint256 shares, address receiver, address owner) public onlyOwner returns (uint256) {
 //         return vault.redeem(shares, receiver, owner);
 //     }
-    
+
 // }
-
-
 
 // // TAKEN FROM Cross Chain idea draft
 //     // function crossChainSendUnderlying(uint256 amount) public onlyOwner {
 //     //     vault.transferUnderlyingToOwner(amount);
-        
+
 //     //     // Create token transfer message for CCIP
 //     //     // Transfer tokens to CCIP Receiver
 //     // }
@@ -62,7 +60,7 @@
 //     // function receiveUnderlying(uint256 amount) public onlyOwner {
 //     //     SafeERC20.safeTransferFrom(_asset, address(this), vault, assets);
 //     // }
-    
+
 //     // function crossChainReceiveShares(ccip details) ensureSentByCCIP public {
 //     //     // require sender payload was sent from approved sender and chain (ccip details)
 //     //     // Mint shares for user at given destinationAddress
