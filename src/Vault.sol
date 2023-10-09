@@ -49,12 +49,10 @@ contract Vault is ERC4626, Ownable {
 
     function beforeWithdraw(uint256 assets, uint256 /*shares*/ ) internal override after_updateTotalAssetsInStrategy {
         _withdrawFromStrategy(assets);
-        // Could do s_totalAssetsInStrategy -= assets instead? Could be more gas efficient
     }
 
     function afterDeposit(uint256 assets, uint256 /*shares*/ ) internal override after_updateTotalAssetsInStrategy {
         _depositToStrategy(assets);
-        // Could do s_totalAssetsInStrategy += assets instead? Could be more gas efficient
     }
 
     /*//////////////////////////////////////////////////////////////
