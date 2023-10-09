@@ -28,6 +28,8 @@ contract VaultForkTest is Test {
     uint256 mainnetFork;
     address constant MAINNET_DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address constant MAINNET_DSRMANAGER = 0x373238337Bfe1146fb49989fc222523f83081dDb;
+    address constant MAINNET_DATA_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
+    address constant MAINNET_UNISWAP_V2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D ;
 
     address owner;
     address alice;
@@ -46,7 +48,7 @@ contract VaultForkTest is Test {
         s_pool = MAINNET_DSRMANAGER;
 
         vm.startPrank(owner);
-        s_strategy = new MakerDAOYieldStrategy(MAINNET_DAI);
+        s_strategy = new MakerDAOYieldStrategy(MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
         s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, s_pool), address(0x0), payable(0x0));
         vm.stopPrank();
 
@@ -58,7 +60,7 @@ contract VaultForkTest is Test {
 
     function testOnlyOwnerCanSetStrategy() public {
         vm.startPrank(owner);
-        IYieldStrategy newStrategy = new MakerDAOYieldStrategy(MAINNET_DAI);
+        IYieldStrategy newStrategy = new MakerDAOYieldStrategy(MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
         StrategyParams memory newStrategyParams = StrategyParams(newStrategy, s_pool);
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
