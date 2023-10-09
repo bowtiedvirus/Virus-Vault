@@ -40,7 +40,7 @@ contract MockYieldStrategyBadDeposit is IYieldStrategy {
     function withdraw(address, address, uint256) external pure override {
         revert();
     }
-    
+
     function withdrawAll(address, address) external pure override {
         revert();
     }
