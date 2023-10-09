@@ -8,9 +8,9 @@ import {MockERC20} from "@solmate/src/test/utils/mocks/MockERC20.sol";
 import {
     Vault,
     StrategyParams,
-    CouldNotWithdrawFromStrategy,
-    CouldNotDepositToStrategy,
-    CouldNotGetTotalAssetsFromStrategy
+    Vault_CouldNotWithdrawFromStrategy,
+    Vault_CouldNotDepositToStrategy,
+    Vault_CouldNotGetTotalAssetsFromStrategy
 } from "../src/Vault.sol";
 import {IYieldStrategy} from "../src/interfaces/IYieldStrategy.sol";
 import {
@@ -41,7 +41,7 @@ contract VaultTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MockYieldStrategy();
-        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)));
+        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
         vm.stopPrank();
 
         s_underlying.mint(address(s_pool), 1000 ether);
@@ -107,7 +107,9 @@ contract VaultTest is Test {
 
         // If this strategy is bad (reverts on deposit), the vault will also revert when depositing to the new strategy target.
         vm.expectRevert(
-            abi.encodeWithSelector(CouldNotDepositToStrategy.selector, owner, address(s_underlying), address(s_pool), 0)
+            abi.encodeWithSelector(
+                Vault_CouldNotDepositToStrategy.selector, owner, address(s_underlying), address(s_pool), 0
+            )
         );
 
         StrategyParams memory newStrategyParams = StrategyParams(badStrategy, address(s_pool));
@@ -121,7 +123,9 @@ contract VaultTest is Test {
 
         // If this strategy is bad (reverts on totalAssets), the vault will also revert when re-calculating totalAssets.
         vm.expectRevert(
-            abi.encodeWithSelector(CouldNotGetTotalAssetsFromStrategy.selector, address(s_underlying), address(s_pool))
+            abi.encodeWithSelector(
+                Vault_CouldNotGetTotalAssetsFromStrategy.selector, address(s_underlying), address(s_pool)
+            )
         );
         StrategyParams memory newStrategyParams = StrategyParams(badStrategy, address(s_pool));
         s_vault.setNewStrategy(newStrategyParams);
@@ -143,7 +147,7 @@ contract VaultTest is Test {
         vm.startPrank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
-                CouldNotWithdrawFromStrategy.selector, alice, address(s_underlying), address(s_pool), 100 ether
+                Vault_CouldNotWithdrawFromStrategy.selector, alice, address(s_underlying), address(s_pool), 100 ether
             )
         );
         s_vault.withdraw(100 ether, alice, alice);

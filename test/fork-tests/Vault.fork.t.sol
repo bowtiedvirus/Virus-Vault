@@ -8,9 +8,9 @@ import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 import {
     Vault,
     StrategyParams,
-    CouldNotWithdrawFromStrategy,
-    CouldNotDepositToStrategy,
-    CouldNotGetTotalAssetsFromStrategy
+    Vault_CouldNotWithdrawFromStrategy,
+    Vault_CouldNotDepositToStrategy,
+    Vault_CouldNotGetTotalAssetsFromStrategy
 } from "../../src/Vault.sol";
 import {IYieldStrategy} from "../../src/interfaces/IYieldStrategy.sol";
 import {IDSRManager} from "../../src/interfaces/IDSRManager.sol";
@@ -47,7 +47,7 @@ contract VaultForkTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MakerDAOYieldStrategy(MAINNET_DAI);
-        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, s_pool));
+        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, s_pool), address(0x0), payable(0x0));
         vm.stopPrank();
 
         deal(MAINNET_DAI, alice, 100 ether, true);

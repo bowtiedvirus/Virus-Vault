@@ -20,7 +20,7 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         if (underlying_asset != i_daiAddress) {
             revert("MakerDAOYieldStrategy: deposit asset must be DAI");
         }
-    
+
         ERC20 daiToken = ERC20(underlying_asset);
         IDSRManager dsrM = IDSRManager(target);
 
@@ -50,7 +50,7 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         if (underlying_asset != i_daiAddress) {
             revert("MakerDAOYieldStrategy: totalAssets asset must be DAI");
         }
-    
+
         IDSRManager dsrM = IDSRManager(target);
         uint256 balance = dsrM.daiBalance(address(this));
         emit DaiBalance(address(this), balance);
