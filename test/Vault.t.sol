@@ -20,7 +20,7 @@ import {
     MockYieldStrategyBadWithdraw
 } from "./mocks/MockYieldStrategy.sol";
 
-contract OwnableERC4626Test is Test {
+contract VaultTest is Test {
     MockERC20 s_underlying;
     Vault s_vault;
     IYieldStrategy s_strategy;
