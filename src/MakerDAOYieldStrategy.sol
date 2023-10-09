@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.13;
 
+import {console2} from "forge-std/Test.sol";
 import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import {FeedRegistryInterface} from "@chainlink/contracts/src/v0.8/interfaces/FeedRegistryInterface.sol";
@@ -30,6 +31,8 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
     }
 
     function deposit(uint256 amount) external override {
+        // Want to know something weird? Forge coverage won't track this file if I remove this console.log! Awesum!
+        console2.log("");
         uint256 daiAmount = amount;
         // Swap to DAI if underlying is not DAI
         if (i_underlyingAsset != i_daiAddress) {
