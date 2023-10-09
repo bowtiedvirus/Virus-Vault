@@ -41,7 +41,8 @@ contract VaultTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MockYieldStrategy();
-        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
+        s_vault =
+        new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
         vm.stopPrank();
 
         s_underlying.mint(address(s_pool), 1000 ether);

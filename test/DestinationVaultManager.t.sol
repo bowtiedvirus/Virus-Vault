@@ -11,10 +11,7 @@ import {IYieldStrategy} from "../src/interfaces/IYieldStrategy.sol";
 import {MockYieldStrategy, MockPool} from "./mocks/MockYieldStrategy.sol";
 import {MockRouterClient} from "./mocks/MockRouterClient.sol";
 import {MockCCIPReceiverRouter} from "./mocks/MockCCIPReceiverRouter.sol";
-import {
-    Vault,
-    StrategyParams
-} from "../src/Vault.sol";
+import {Vault, StrategyParams} from "../src/Vault.sol";
 
 contract DestinationVaultManagerTest is Test {
     DestinationVaultManager s_destVaultManager;
@@ -39,7 +36,8 @@ contract DestinationVaultManagerTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MockYieldStrategy();
-        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
+        s_vault =
+        new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
         s_router = new MockCCIPReceiverRouter();
         s_destVaultManager = new DestinationVaultManager(address(s_router), address(s_vault));
         s_vault.setDestinationVaultManager(address(s_destVaultManager));
@@ -69,7 +67,7 @@ contract DestinationVaultManagerTest is Test {
         vm.expectRevert();
         s_destVaultManager.ccipReceive(message);
     }
-    
+
     function testReceiveRevertsWithNonApprovedChain() public {
         vm.startPrank(address(s_router));
 
@@ -102,7 +100,7 @@ contract DestinationVaultManagerTest is Test {
         vm.expectRevert();
         s_destVaultManager.ccipReceive(message);
     }
-    
+
     function testReceiveWithCrossChainMintDataMintsShares() public {
         vm.startPrank(owner);
         s_destVaultManager.setApprovedSourceVaultManager(69420, address(s_vault));

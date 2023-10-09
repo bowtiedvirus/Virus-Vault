@@ -5,7 +5,6 @@ import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-
 import {Vault} from "./Vault.sol";
 
 error DestinationVaultManager__CallToVaultFailed();
@@ -13,8 +12,7 @@ error DestinationVaultManager__CallToVaultFailed();
 contract DestinationVaultManager is CCIPReceiver, Ownable {
     Vault public immutable si_vault;
 
-    mapping (uint64 => address) public approvedSourceVaultManagers;
-
+    mapping(uint64 => address) public approvedSourceVaultManagers;
 
     event SendSharesCallSuccessful();
 
@@ -28,7 +26,10 @@ contract DestinationVaultManager is CCIPReceiver, Ownable {
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
         address sender = abi.decode(message.sender, (address));
-        require(approvedSourceVaultManagers[message.sourceChainSelector] == sender, "DestinationVaultManager: Source vault manager address not approved");
+        require(
+            approvedSourceVaultManagers[message.sourceChainSelector] == sender,
+            "DestinationVaultManager: Source vault manager address not approved"
+        );
 
         (bool success,) = address(si_vault).call(message.data);
         if (!success) {

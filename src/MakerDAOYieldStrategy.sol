@@ -27,15 +27,14 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         uint256 daiAmount = amount;
         // Swap to DAI if underlying is not DAI
         if (underlying_asset != i_daiAddress) {
-            int underlyingEthPrice = getEthPrice(underlying_asset);
-            int daiEthPrice = getEthPrice(i_daiAddress);
+            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices(underlying_asset);
             daiAmount = amount * uint256(daiEthPrice) / uint256(underlyingEthPrice); // Assumes it is token per ETH in the unit conversion
 
-            require(ERC20(underlying_asset).approve(address(i_uniswapRouter), amount), 'approve failed.');
-            address[] memory path = new address[](2);
-            path[0] = underlying_asset;
-            path[1] = i_daiAddress;
-            IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(amount, 0, path, address(this), block.timestamp);
+            require(ERC20(underlying_asset).approve(address(i_uniswapRouter), amount), "approve failed.");
+            address[] memory path = makeSimpleSwapPath(underlying_asset, i_daiAddress);
+            IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(
+                amount, 0, path, address(this), block.timestamp
+            );
         }
 
         daiAmount = ERC20(i_daiAddress).balanceOf(address(this));
@@ -51,8 +50,7 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
 
         uint256 daiAmount = amount;
         if (underlying_asset != i_daiAddress) {
-            int underlyingEthPrice = getEthPrice(underlying_asset);
-            int daiEthPrice = getEthPrice(i_daiAddress);
+            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices(underlying_asset);
             daiAmount = amount * uint256(daiEthPrice) / uint256(underlyingEthPrice); // Assumes it is token per ETH in the unit conversion
         }
 
@@ -63,14 +61,14 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         }
         dsrM.exit(address(this), daiAmount);
 
-
         if (underlying_asset != i_daiAddress) {
-            require(ERC20(i_daiAddress).approve(address(i_uniswapRouter), daiAmount), 'approve failed.');
-            address[] memory path = new address[](2);
-            path[0] = i_daiAddress;
-            path[1] = underlying_asset;
+            require(ERC20(i_daiAddress).approve(address(i_uniswapRouter), daiAmount), "approve failed.");
+            address[] memory path = makeSimpleSwapPath(i_daiAddress, underlying_asset);
+
             // Open to sandwich attacks, but hard to exploit with high liquidity pairs (e.g. DAI/USDC)
-            IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(daiAmount, 0, path, address(this), block.timestamp); 
+            IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(
+                daiAmount, 0, path, address(this), block.timestamp
+            );
         }
     }
 
@@ -81,11 +79,12 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         uint256 daiAmount = ERC20(i_daiAddress).balanceOf(address(this));
 
         if (underlying_asset != i_daiAddress) {
-            require(ERC20(i_daiAddress).approve(address(i_uniswapRouter), daiAmount), 'approve failed.');
-            address[] memory path = new address[](2);
-            path[0] = i_daiAddress;
-            path[1] = underlying_asset;
-            IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(daiAmount, 0, path, address(this), block.timestamp);
+            require(ERC20(i_daiAddress).approve(address(i_uniswapRouter), daiAmount), "approve failed.");
+            address[] memory path = makeSimpleSwapPath(i_daiAddress, underlying_asset);
+
+            IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(
+                daiAmount, 0, path, address(this), block.timestamp
+            );
         }
     }
 
@@ -95,26 +94,42 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         emit DaiBalance(address(this), balance);
 
         if (underlying_asset != i_daiAddress) {
-            int underlyingEthPrice = getEthPrice(underlying_asset);
-            int daiEthPrice = getEthPrice(i_daiAddress);
+            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices(underlying_asset);
             uint256 underlyingAmount = balance * uint256(underlyingEthPrice) / uint256(daiEthPrice);
-
             return underlyingAmount;
         }
 
         return balance;
     }
 
+    function getUnderlyingAndDaiEthPrices(address underlying_asset)
+        internal
+        returns (int256 underlyingEthPrice, int256 daiEthPrice)
+    {
+        underlyingEthPrice = getEthPrice(underlying_asset);
+        daiEthPrice = getEthPrice(i_daiAddress);
+    }
+
+    function makeSimpleSwapPath(address from, address to) internal pure returns (address[] memory) {
+        address[] memory path = new address[](2);
+        path[0] = from;
+        path[1] = to;
+        return path;
+    }
+
     /*//////////////////////////////////////////////////////////////
                           Price Feed Logic
     //////////////////////////////////////////////////////////////*/
 
-    function getEthPrice(address asset) public view returns (int) {
+    function getEthPrice(address asset) public view returns (int256) {
         (
-            /*uint80 roundID*/,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
+            /*uint80 roundID*/
+            ,
+            int256 price,
+            /*uint startedAt*/
+            ,
+            /*uint timeStamp*/
+            ,
             /*uint80 answeredInRound*/
         ) = i_dataFeedRegistry.latestRoundData(asset, Denominations.ETH);
         return price;

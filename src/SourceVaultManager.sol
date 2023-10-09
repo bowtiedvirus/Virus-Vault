@@ -14,7 +14,7 @@ contract SourceVaultManager is Ownable {
     address immutable i_router;
     address immutable i_link;
 
-    mapping (uint64 => address) public approvedDestinationVaultManagers;
+    mapping(uint64 => address) public approvedDestinationVaultManagers;
 
     event SendSharesMessageSent(bytes32 messageId);
     event SendSharesFeeEstimate(uint256 fee, address fee_token);
@@ -30,7 +30,10 @@ contract SourceVaultManager is Ownable {
         _;
     }
 
-    function setApprovedDestinationVaultManager(uint64 destinationChainSelector, address destinationVaultManager) external onlyOwner {
+    function setApprovedDestinationVaultManager(uint64 destinationChainSelector, address destinationVaultManager)
+        external
+        onlyOwner
+    {
         approvedDestinationVaultManagers[destinationChainSelector] = destinationVaultManager;
     }
 
@@ -43,7 +46,10 @@ contract SourceVaultManager is Ownable {
         address destinationVaultManager,
         address feeRefundAddress
     ) external payable onlyVault {
-        require(approvedDestinationVaultManagers[destinationChainSelector] == destinationVaultManager, "SourceMinter: Destination vault manager not approved");
+        require(
+            approvedDestinationVaultManagers[destinationChainSelector] == destinationVaultManager,
+            "SourceMinter: Destination vault manager not approved"
+        );
 
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(destinationVaultManager),

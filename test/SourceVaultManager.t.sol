@@ -9,10 +9,7 @@ import "../src/SourceVaultManager.sol";
 import {IYieldStrategy} from "../src/interfaces/IYieldStrategy.sol";
 import {MockYieldStrategy, MockPool} from "./mocks/MockYieldStrategy.sol";
 import {MockRouterClient} from "./mocks/MockRouterClient.sol";
-import {
-    Vault,
-    StrategyParams
-} from "../src/Vault.sol";
+import {Vault, StrategyParams} from "../src/Vault.sol";
 
 contract SourceVaultManagerTest is Test {
     SourceVaultManager s_sourceVaultManager;
@@ -37,8 +34,10 @@ contract SourceVaultManagerTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MockYieldStrategy();
-        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
-        s_sourceVaultManager = new SourceVaultManager(address(new MockRouterClient()), address(0x1234), address(s_vault));
+        s_vault =
+        new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
+        s_sourceVaultManager =
+            new SourceVaultManager(address(new MockRouterClient()), address(0x1234), address(s_vault));
         s_vault.setSourceVaultManager(payable(s_sourceVaultManager));
         s_sourceVaultManager.setApprovedDestinationVaultManager(0, address(0x0));
         vm.stopPrank();
@@ -71,16 +70,20 @@ contract SourceVaultManagerTest is Test {
         assertEq(s_sourceVaultManager.approvedDestinationVaultManagers(0), address(0x1));
     }
 
-    function testOnlyApprovedDestinationVaultManagersCanBeSentTo(uint64 chainId, address destinationVaultManager) public {
+    function testOnlyApprovedDestinationVaultManagersCanBeSentTo(uint64 chainId, address destinationVaultManager)
+        public
+    {
         vm.assume(chainId != 0);
         vm.assume(destinationVaultManager != address(0x0));
 
         vm.startPrank(address(s_vault));
         vm.expectRevert();
-        s_sourceVaultManager.sendShares{value: 1 ether}(address(alice), 100 ether, chainId, destinationVaultManager, address(0x0));
+        s_sourceVaultManager.sendShares{value: 1 ether}(
+            address(alice), 100 ether, chainId, destinationVaultManager, address(0x0)
+        );
         vm.stopPrank();
     }
-    
+
     function testSendNotEnoughFee() public {
         vm.startPrank(address(s_vault));
         vm.expectRevert();
