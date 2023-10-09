@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 
 import {IYieldStrategy} from "./interfaces/IYieldStrategy.sol";
+import {IDSRManager} from "./interfaces/IDSRManager.sol";
 
 interface DsrManager {
     function daiBalance(address usr) external returns (uint256 wad);
@@ -25,7 +26,7 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         ERC20 daiToken = ERC20(underlying_asset);
         DsrManager dsrM = DsrManager(target);
 
-        daiToken.transferFrom(msg.sender, address(this), amount);
+        daiToken.approve(address(dsrM), amount);
         dsrM.join(address(this), amount);
     }
 
