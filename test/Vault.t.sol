@@ -41,8 +41,7 @@ contract VaultTest is Test {
 
         vm.startPrank(owner);
         s_strategy = new MockYieldStrategy();
-        s_vault =
-            new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)));
+        s_vault = new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)));
         vm.stopPrank();
 
         s_underlying.mint(address(s_pool), 1000 ether);
@@ -152,7 +151,6 @@ contract VaultTest is Test {
     }
 
     function testVaultMovesAssetsToNewStrategyWhenSet() public {
-
         vm.startPrank(alice);
         s_underlying.approve(address(s_vault), 100 ether);
         s_vault.deposit(100 ether, alice);
