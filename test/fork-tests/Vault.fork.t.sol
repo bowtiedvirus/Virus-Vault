@@ -48,7 +48,8 @@ contract VaultForkTest is Test {
         s_pool = MAINNET_DSRMANAGER;
 
         vm.startPrank(owner);
-        s_strategy = new MakerDAOYieldStrategy(MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
+        s_strategy =
+        new MakerDAOYieldStrategy(address(s_underlying), s_pool, MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
         s_vault =
         new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, s_pool), address(0x0), payable(0x0));
         vm.stopPrank();
@@ -62,7 +63,7 @@ contract VaultForkTest is Test {
     function testOnlyOwnerCanSetStrategy() public {
         vm.startPrank(owner);
         IYieldStrategy newStrategy =
-            new MakerDAOYieldStrategy(MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
+        new MakerDAOYieldStrategy(address(s_underlying), s_pool, MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
         StrategyParams memory newStrategyParams = StrategyParams(newStrategy, s_pool);
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
@@ -111,7 +112,7 @@ contract VaultForkTest is Test {
 
         MockPool newPool = new MockPool(s_underlying);
         vm.startPrank(owner);
-        IYieldStrategy newStrategy = new MockYieldStrategy();
+        IYieldStrategy newStrategy = new MockYieldStrategy(address(s_underlying), address(newPool));
         StrategyParams memory newStrategyParams = StrategyParams(newStrategy, address(newPool));
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();

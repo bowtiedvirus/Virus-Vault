@@ -17,21 +17,27 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
 
     event DaiBalance(address indexed src, uint256 balance);
 
-    constructor(address daiAddress, address dataFeedRegistry, address uniswapRouter) {
+    constructor(
+        address underlyingAsset,
+        address target,
+        address daiAddress,
+        address dataFeedRegistry,
+        address uniswapRouter
+    ) IYieldStrategy(underlyingAsset, target) {
         i_daiAddress = daiAddress;
         i_dataFeedRegistry = FeedRegistryInterface(dataFeedRegistry);
         i_uniswapRouter = IUniswapV2Router02(uniswapRouter);
     }
 
-    function deposit(address underlying_asset, address target, uint256 amount) external override {
+    function deposit(uint256 amount) external override {
         uint256 daiAmount = amount;
         // Swap to DAI if underlying is not DAI
-        if (underlying_asset != i_daiAddress) {
-            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices(underlying_asset);
+        if (i_underlyingAsset != i_daiAddress) {
+            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices();
             daiAmount = amount * uint256(daiEthPrice) / uint256(underlyingEthPrice); // Assumes it is token per ETH in the unit conversion
 
-            require(ERC20(underlying_asset).approve(address(i_uniswapRouter), amount), "approve failed.");
-            address[] memory path = makeSimpleSwapPath(underlying_asset, i_daiAddress);
+            require(ERC20(i_underlyingAsset).approve(address(i_uniswapRouter), amount), "approve failed.");
+            address[] memory path = makeSimpleSwapPath(i_underlyingAsset, i_daiAddress);
             IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(
                 amount, 0, path, address(this), block.timestamp
             );
@@ -39,31 +45,31 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
 
         daiAmount = ERC20(i_daiAddress).balanceOf(address(this));
 
-        IDSRManager dsrM = IDSRManager(target);
+        IDSRManager dsrM = IDSRManager(i_target);
         ERC20(i_daiAddress).approve(address(dsrM), daiAmount);
         dsrM.join(address(this), daiAmount);
     }
 
-    function withdraw(address underlying_asset, address target, uint256 amount) external override {
+    function withdraw(uint256 amount) external override {
         // Normalize ERC with non-standard decimals to get the units up to speed with what was returned by uniswap
-        amount *= 10 ** (18 - ERC20(underlying_asset).decimals());
+        amount *= 10 ** (18 - ERC20(i_underlyingAsset).decimals());
 
         uint256 daiAmount = amount;
-        if (underlying_asset != i_daiAddress) {
-            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices(underlying_asset);
+        if (i_underlyingAsset != i_daiAddress) {
+            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices();
             daiAmount = amount * uint256(daiEthPrice) / uint256(underlyingEthPrice); // Assumes it is token per ETH in the unit conversion
         }
 
-        IDSRManager dsrM = IDSRManager(target);
+        IDSRManager dsrM = IDSRManager(i_target);
         uint256 daiBalance = dsrM.daiBalance(address(this));
         if (daiAmount > daiBalance) {
             daiAmount = daiBalance;
         }
         dsrM.exit(address(this), daiAmount);
 
-        if (underlying_asset != i_daiAddress) {
+        if (i_underlyingAsset != i_daiAddress) {
             require(ERC20(i_daiAddress).approve(address(i_uniswapRouter), daiAmount), "approve failed.");
-            address[] memory path = makeSimpleSwapPath(i_daiAddress, underlying_asset);
+            address[] memory path = makeSimpleSwapPath(i_daiAddress, i_underlyingAsset);
 
             // Open to sandwich attacks, but hard to exploit with high liquidity pairs (e.g. DAI/USDC)
             IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(
@@ -72,15 +78,15 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         }
     }
 
-    function withdrawAll(address underlying_asset, address target) external override {
-        IDSRManager dsrM = IDSRManager(target);
+    function withdrawAll() external override {
+        IDSRManager dsrM = IDSRManager(i_target);
         dsrM.exitAll(address(this));
 
         uint256 daiAmount = ERC20(i_daiAddress).balanceOf(address(this));
 
-        if (underlying_asset != i_daiAddress) {
+        if (i_underlyingAsset != i_daiAddress) {
             require(ERC20(i_daiAddress).approve(address(i_uniswapRouter), daiAmount), "approve failed.");
-            address[] memory path = makeSimpleSwapPath(i_daiAddress, underlying_asset);
+            address[] memory path = makeSimpleSwapPath(i_daiAddress, i_underlyingAsset);
 
             IUniswapV2Router02(i_uniswapRouter).swapExactTokensForTokens(
                 daiAmount, 0, path, address(this), block.timestamp
@@ -88,13 +94,13 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         }
     }
 
-    function totalAssets(address underlying_asset, address target) external override returns (uint256) {
-        IDSRManager dsrM = IDSRManager(target);
+    function totalAssets() external override returns (uint256) {
+        IDSRManager dsrM = IDSRManager(i_target);
         uint256 balance = dsrM.daiBalance(address(this));
         emit DaiBalance(address(this), balance);
 
-        if (underlying_asset != i_daiAddress) {
-            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices(underlying_asset);
+        if (i_underlyingAsset != i_daiAddress) {
+            (int256 underlyingEthPrice, int256 daiEthPrice) = getUnderlyingAndDaiEthPrices();
             uint256 underlyingAmount = balance * uint256(underlyingEthPrice) / uint256(daiEthPrice);
             return underlyingAmount;
         }
@@ -102,11 +108,8 @@ contract MakerDAOYieldStrategy is IYieldStrategy {
         return balance;
     }
 
-    function getUnderlyingAndDaiEthPrices(address underlying_asset)
-        internal
-        returns (int256 underlyingEthPrice, int256 daiEthPrice)
-    {
-        underlyingEthPrice = getEthPrice(underlying_asset);
+    function getUnderlyingAndDaiEthPrices() internal view returns (int256 underlyingEthPrice, int256 daiEthPrice) {
+        underlyingEthPrice = getEthPrice(i_underlyingAsset);
         daiEthPrice = getEthPrice(i_daiAddress);
     }
 

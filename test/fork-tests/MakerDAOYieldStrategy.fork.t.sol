@@ -35,8 +35,9 @@ contract MakerDAOYieldStrategyForkTest is Test {
         bob = makeAddr("bob");
 
         vm.startPrank(owner);
-        s_strategy = new MakerDAOYieldStrategy(MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
         s_underlying = MAINNET_USDC;
+        s_strategy =
+        new MakerDAOYieldStrategy(s_underlying, MAINNET_DSRMANAGER, MAINNET_DAI, MAINNET_DATA_FEED_REGISTRY, MAINNET_UNISWAP_V2_ROUTER);
         vm.stopPrank();
 
         deal(s_underlying, address(s_strategy), 100 ether, true);
@@ -44,7 +45,7 @@ contract MakerDAOYieldStrategyForkTest is Test {
     }
 
     function testDeposit() public {
-        s_strategy.deposit(s_underlying, MAINNET_DSRMANAGER, 100 ether);
+        s_strategy.deposit(100 ether);
         uint256 balance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertEq(ERC20(s_underlying).balanceOf(address(s_strategy)), 0 ether);
@@ -52,13 +53,13 @@ contract MakerDAOYieldStrategyForkTest is Test {
     }
 
     function testWithdraw() public {
-        s_strategy.deposit(s_underlying, MAINNET_DSRMANAGER, 100 ether);
+        s_strategy.deposit(100 ether);
         uint256 depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertEq(ERC20(s_underlying).balanceOf(address(s_strategy)), 0 ether);
         assertGe(depositBalance, 99 ether);
 
-        s_strategy.withdraw(s_underlying, MAINNET_DSRMANAGER, 100 ether);
+        s_strategy.withdraw(100 ether);
         uint256 withdrawBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertGe(ERC20(s_underlying).balanceOf(address(s_strategy)), 98 ether);
@@ -66,13 +67,13 @@ contract MakerDAOYieldStrategyForkTest is Test {
     }
 
     function testWithdrawAll() public {
-        s_strategy.deposit(s_underlying, MAINNET_DSRMANAGER, 100 ether);
+        s_strategy.deposit(100 ether);
         uint256 depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertEq(ERC20(s_underlying).balanceOf(address(s_strategy)), 0 ether);
         assertGe(depositBalance, 99 ether);
 
-        s_strategy.withdrawAll(s_underlying, MAINNET_DSRMANAGER);
+        s_strategy.withdrawAll();
         uint256 withdrawBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
 
         assertGe(ERC20(s_underlying).balanceOf(address(s_strategy)), 98 ether);
@@ -80,10 +81,10 @@ contract MakerDAOYieldStrategyForkTest is Test {
     }
 
     function testGetTotalAssets() public {
-        uint256 balance = s_strategy.totalAssets(s_underlying, MAINNET_DSRMANAGER);
+        uint256 balance = s_strategy.totalAssets();
         assertEq(balance, 0 ether);
 
-        s_strategy.deposit(s_underlying, MAINNET_DSRMANAGER, 100 ether);
+        s_strategy.deposit(100 ether);
         uint256 depositBalance = IDSRManager(MAINNET_DSRMANAGER).daiBalance(address(s_strategy));
         assertGe(depositBalance, 99 ether);
     }

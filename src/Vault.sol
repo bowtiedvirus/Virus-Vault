@@ -83,8 +83,7 @@ contract Vault is ERC4626, Ownable {
 
     function _withdrawFromStrategy(uint256 amount) internal {
         address yieldStrategyAddress = address(s_strategy.implementation);
-        bytes memory withdrawCalldata =
-            abi.encodeWithSignature("withdraw(address,address,uint256)", address(asset), s_strategy.target, amount);
+        bytes memory withdrawCalldata = abi.encodeWithSignature("withdraw(uint256)", amount);
 
         (bool success,) = yieldStrategyAddress.delegatecall(withdrawCalldata);
         if (!success) {
@@ -96,8 +95,7 @@ contract Vault is ERC4626, Ownable {
 
     function _depositToStrategy(uint256 amount) internal {
         address yieldStrategyAddress = address(s_strategy.implementation);
-        bytes memory depositCalldata =
-            abi.encodeWithSignature("deposit(address,address,uint256)", address(asset), s_strategy.target, amount);
+        bytes memory depositCalldata = abi.encodeWithSignature("deposit(uint256)", amount);
 
         (bool success,) = yieldStrategyAddress.delegatecall(depositCalldata);
         if (!success) {
@@ -109,8 +107,7 @@ contract Vault is ERC4626, Ownable {
 
     function _getTotalAssetsInStrategy() internal returns (uint256) {
         address yieldStrategyAddress = address(s_strategy.implementation);
-        bytes memory totalAssetsCalldata =
-            abi.encodeWithSignature("totalAssets(address,address)", address(asset), s_strategy.target);
+        bytes memory totalAssetsCalldata = abi.encodeWithSignature("totalAssets()");
 
         (bool success, bytes memory retData) = yieldStrategyAddress.delegatecall(totalAssetsCalldata);
         if (!success) {

@@ -35,7 +35,7 @@ contract DestinationVaultManagerTest is Test {
         s_pool = new MockPool(s_underlying);
 
         vm.startPrank(owner);
-        s_strategy = new MockYieldStrategy();
+        s_strategy = new MockYieldStrategy(address(s_underlying), address(s_pool));
         s_vault =
         new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
         s_router = new MockCCIPReceiverRouter();

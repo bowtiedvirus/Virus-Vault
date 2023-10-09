@@ -40,7 +40,7 @@ contract VaultTest is Test {
         s_pool = new MockPool(s_underlying);
 
         vm.startPrank(owner);
-        s_strategy = new MockYieldStrategy();
+        s_strategy = new MockYieldStrategy(address(s_underlying), address(s_pool));
         s_vault =
         new Vault(s_underlying, "Mock Token Vault", "vwTKN", StrategyParams(s_strategy, address(s_pool)), address(0x0), payable(0x0));
         vm.stopPrank();
@@ -52,7 +52,7 @@ contract VaultTest is Test {
 
     function testOnlyOwnerCanSetStrategy() public {
         vm.startPrank(owner);
-        IYieldStrategy newStrategy = new MockYieldStrategy();
+        IYieldStrategy newStrategy = new MockYieldStrategy(address(s_underlying), address(s_pool));
         StrategyParams memory newStrategyParams = StrategyParams(newStrategy, address(s_pool));
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
@@ -64,7 +64,7 @@ contract VaultTest is Test {
 
     function testNonOwnerUnableToSetStrategy() public {
         vm.startPrank(owner);
-        IYieldStrategy newStrategy = new MockYieldStrategy();
+        IYieldStrategy newStrategy = new MockYieldStrategy(address(s_underlying), address(s_pool));
         vm.stopPrank();
 
         vm.startPrank(alice);
@@ -104,7 +104,7 @@ contract VaultTest is Test {
 
     function testYieldStrategyWithBadDepositIsRejectedBySetNewStrategy() public {
         vm.startPrank(owner);
-        IYieldStrategy badStrategy = new MockYieldStrategyBadDeposit();
+        IYieldStrategy badStrategy = new MockYieldStrategyBadDeposit(address(s_underlying), address(s_pool));
 
         // If this strategy is bad (reverts on deposit), the vault will also revert when depositing to the new strategy target.
         vm.expectRevert(
@@ -120,7 +120,7 @@ contract VaultTest is Test {
 
     function testYieldStrategyWithBadTotalAssetsIsRejectedBySetNewStrategy() public {
         vm.startPrank(owner);
-        IYieldStrategy badStrategy = new MockYieldStrategyBadTotalAssets();
+        IYieldStrategy badStrategy = new MockYieldStrategyBadTotalAssets(address(s_underlying), address(s_pool));
 
         // If this strategy is bad (reverts on totalAssets), the vault will also revert when re-calculating totalAssets.
         vm.expectRevert(
@@ -140,7 +140,7 @@ contract VaultTest is Test {
         vm.stopPrank();
 
         vm.startPrank(owner);
-        IYieldStrategy badStrategy = new MockYieldStrategyBadWithdraw();
+        IYieldStrategy badStrategy = new MockYieldStrategyBadWithdraw(address(s_underlying), address(s_pool));
         StrategyParams memory newStrategyParams = StrategyParams(badStrategy, address(s_pool));
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();
@@ -166,7 +166,7 @@ contract VaultTest is Test {
 
         MockPool newPool = new MockPool(s_underlying);
         vm.startPrank(owner);
-        IYieldStrategy newStrategy = new MockYieldStrategy();
+        IYieldStrategy newStrategy = new MockYieldStrategy(address(s_underlying), address(newPool));
         StrategyParams memory newStrategyParams = StrategyParams(newStrategy, address(newPool));
         s_vault.setNewStrategy(newStrategyParams);
         vm.stopPrank();

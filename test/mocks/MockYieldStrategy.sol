@@ -16,21 +16,23 @@ contract MockYieldStrategy is IYieldStrategy {
     // https://github.com/foundry-rs/foundry/issues/2988
     function test() public {}
 
-    function deposit(address underlying_asset, address target, uint256 amount) public override {
-        ERC20(underlying_asset).safeApprove(target, amount);
-        MockPool(target).stake(amount);
+    constructor(address underlying, address target) IYieldStrategy(underlying, target) {}
+
+    function deposit(uint256 amount) public override {
+        ERC20(i_underlyingAsset).safeApprove(i_target, amount);
+        MockPool(i_target).stake(amount);
     }
 
-    function withdraw(address, address target, uint256 amount) public override {
-        MockPool(target).unstake(amount);
+    function withdraw(uint256 amount) public override {
+        MockPool(i_target).unstake(amount);
     }
 
-    function withdrawAll(address, address target) public override {
-        MockPool(target).unstake(totalAssets(address(this), target));
+    function withdrawAll() public override {
+        MockPool(i_target).unstake(totalAssets());
     }
 
-    function totalAssets(address, address target) public view override returns (uint256) {
-        return MockPool(target).s_balances(address(this));
+    function totalAssets() public view override returns (uint256) {
+        return MockPool(i_target).s_balances(address(this));
     }
 }
 
@@ -41,19 +43,21 @@ contract MockYieldStrategyBadDeposit is IYieldStrategy {
     // https://github.com/foundry-rs/foundry/issues/2988
     function test() public {}
 
-    function deposit(address, address, uint256) external pure override {
+    constructor(address underlying, address target) IYieldStrategy(underlying, target) {}
+
+    function deposit(uint256) external pure override {
         revert();
     }
 
-    function withdraw(address, address, uint256) external pure override {
+    function withdraw(uint256) external pure override {
         revert();
     }
 
-    function withdrawAll(address, address) external pure override {
+    function withdrawAll() external pure override {
         revert();
     }
 
-    function totalAssets(address, address) external pure override returns (uint256) {
+    function totalAssets() external pure override returns (uint256) {
         revert();
     }
 }
@@ -65,17 +69,19 @@ contract MockYieldStrategyBadTotalAssets is IYieldStrategy {
     // https://github.com/foundry-rs/foundry/issues/2988
     function test() public {}
 
-    function deposit(address, address, uint256) external pure override {}
+    constructor(address underlying, address target) IYieldStrategy(underlying, target) {}
 
-    function withdraw(address, address, uint256) external pure override {
+    function deposit(uint256) external pure override {}
+
+    function withdraw(uint256) external pure override {
         revert();
     }
 
-    function withdrawAll(address, address) external pure override {
+    function withdrawAll() external pure override {
         revert();
     }
 
-    function totalAssets(address, address) external pure override returns (uint256) {
+    function totalAssets() external pure override returns (uint256) {
         revert();
     }
 }
@@ -87,17 +93,19 @@ contract MockYieldStrategyBadWithdraw is IYieldStrategy {
     // https://github.com/foundry-rs/foundry/issues/2988
     function test() public {}
 
-    function deposit(address, address, uint256) external pure override {}
+    constructor(address underlying, address target) IYieldStrategy(underlying, target) {}
 
-    function withdraw(address, address, uint256) external pure override {
+    function deposit(uint256) external pure override {}
+
+    function withdraw(uint256) external pure override {
         revert();
     }
 
-    function withdrawAll(address, address) external pure override {
+    function withdrawAll() external pure override {
         revert();
     }
 
-    function totalAssets(address, address) external pure override returns (uint256) {
+    function totalAssets() external pure override returns (uint256) {
         return 0;
     }
 }
